@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:background="@color/white"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/pad_20dp"
+    android:paddingLeft="@dimen/pad_15dp"
+    android:paddingRight="@dimen/pad_15dp"
+    android:paddingTop="@dimen/pad_20dp">
+
+
+    <ImageView
+            android:id="@id/imageView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/logo_login" />
+
+        <EditText
+
+            android:id="@+id/displayName"
+            style="@style/editext_graybg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dip"
+            android:drawableLeft="@drawable/ic_username"
+            android:textSize="18dp"
+            android:hint="Display Name"/><requestFocus />
+
+        <Button
+            android:id="@+id/btnChatt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/pad_20dp"
+            android:background="@color/white"
+            android:padding="10dp"
+            android:text="Let&apos;s Chatt"
+            android:textColor="@color/main_color_green"
+            android:textSize="20dp"
+             />
+</LinearLayout>

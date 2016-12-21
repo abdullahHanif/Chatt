@@ -24,10 +24,9 @@ import com.ubits.chatt.Fragments.ChatList;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    public static String username;
     Toolbar toolbar;
     Bundle bundle = new Bundle();
-    public String username;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -27,6 +27,7 @@ import android.widget.Toast;
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
+import com.ubits.chatt.MainActivity;
 import com.ubits.chatt.R;
 import com.ubits.chatt.model.Conversation;
 
@@ -45,38 +46,75 @@ import static android.app.Activity.RESULT_OK;
 /**
  * Created by Abdullah
  */
-// todo Image is caught and now work on adaptor to show image
-public class GroupChat extends Fragment
-{
+
+public class GroupChat extends Fragment {
+
+  public static final int MESSAGE_SENT = 0;
+  public static final int MESSAGE_RECIEVED = 1;
   private static final int STATUS_OK =1 ;
   private static final int STATUS_ERROR =2 ;
-
+  Button sendButton;
+  TextView tvcam;
+  Bitmap bmp_recieved = null;
   private ChatAdapter adp;
   private ArrayList<Conversation> convList;
   private EditText txt;
-  Button sendButton;
-  TextView tvcam;
-  public static final int MESSAGE_SENT = 0;
-  public static final int MESSAGE_RECIEVED = 1;
-  int sample = R.drawable.ic_launcher;
-
   private Socket socket;
   private String imgDecodableString;
+  private Emitter.Listener IncomingMessageListerner = new Emitter.Listener() {
+    @Override
+    public void call(final Object... args) {
 
-  {
-  try {
+      getActivity().runOnUiThread(new Runnable() {
+        @Override
+        public void run() {
+            JSONObject Data = (JSONObject) args[0];
+            String imageText = "";
+            String text = "";
 
-//    socket = IO.socket("http://192.168.0.105:3000");
-    socket = IO.socket("http://192.168.0.102:3000");
+          JSONObject message = null;
+            try {
+            message = (JSONObject) Data.get("message");
+            } catch (JSONException e) {
+             e.printStackTrace();
+            }
+            try {
+                 text = message.getString("text");
+                 Log.d("RECIEVED MESSAGE",text);
+               // String arr[] = message.split("[\":]");
+//              Log.d("Data Split",arr[2]);
+//              Toast.makeText(getActivity(), ""+arr.length,Toast.LENGTH_LONG).show();
+//              sample Style: {"text":"data"}
+               // addMessage(arr[4],MESSAGE_RECIEVED);
+                 addMessage(text,MESSAGE_RECIEVED);
+              }
+            catch (JSONException e) {
+                e.printStackTrace();
+            }
+            try {
+              imageText = message.getString("image");
+              Log.d("DECODEIMAGE",imageText);
+              Log.d("DECODEIMAGE_MESSAGE",text);
+              //addMessage(imageText,MESSAGE_RECIEVED);
+              bmp_recieved = decodeImage(imageText);
+              addImage(bmp_recieved,MESSAGE_RECIEVED);
+            }
+            catch (JSONException e) {
+              Log.d("ERROR_DECODEIMAGE",imageText);
+            }
+        }
+      });
+    }
+  };
 
-    //   Toast.makeText(this,"Connecting",Toast.LENGTH_SHORT).show();
+  void createSocket(){
+    try {
+      //socket = IO.socket("http://192.168.0.103:3000");
+      socket = IO.socket("http://"+ MainActivity.username+":3000");
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
   }
-  catch (URISyntaxException e){
-
-    throw new RuntimeException(e);
-  }
-}
-
 
   private void loadConversationList() {
     this.convList = new ArrayList();
@@ -91,8 +129,9 @@ public class GroupChat extends Fragment
 
 
   }
-//Old Send Message Way
-//  private void sendMessage() {
+
+  //Old Send Message Way
+ private void sendMessage() {
 //    if (this.txt.length() == 0) {
 //      return;
 //    } else {
@@ -105,9 +144,9 @@ public class GroupChat extends Fragment
 //    this.adp.notifyDataSetChanged();
 //    this.txt.setText("");
 //    }
-//  }
-  private void sendMessage1()
-  {
+  }
+
+  private void sendMessage1() {
     if (this.txt.length() == 0) {
       return;
     } else {
@@ -130,19 +169,18 @@ public class GroupChat extends Fragment
     InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
     imm.hideSoftInputFromWindow(this.txt.getWindowToken(), 0);
 
-    String str = message;
+
       this.txt.setText("");
 
       if(by ==MESSAGE_SENT){
-        this.convList.add(new Conversation(str,null, "12:00 AM", true, true));
+        this.convList.add(new Conversation(message,null, "12:00 AM", true, true));
       }
 
      else if(by ==MESSAGE_RECIEVED){
-        this.convList.add(new Conversation(str,null, "12:00 AM", false, true));
+        this.convList.add(new Conversation(message,null, "12:00 AM", false, true));
       }
     this.adp.notifyDataSetChanged();
  }
-
 
   public View onCreateView(LayoutInflater paramLayoutInflater, ViewGroup paramViewGroup, Bundle paramBundle) {
     View localView = paramLayoutInflater.inflate(R.layout.group_chat, null);
@@ -172,12 +210,12 @@ public class GroupChat extends Fragment
     this.txt = ((EditText)localView.findViewById(R.id.txt));
     this.txt.setInputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE);
 
-    
 
+    createSocket();
     socket.connect();
     Toast.makeText(getActivity(),"Connecting",Toast.LENGTH_SHORT).show();
     socket.on("message",IncomingMessageListerner);
-  
+
   return localView;
   }
 
@@ -209,17 +247,16 @@ public class GroupChat extends Fragment
   }
 }
 
-
-  public void sendImage(String path)
-  {
+  public void sendImage(String path) {
     JSONObject sendData = new JSONObject();
     try{
       sendData.put("image", encodeImage(path));
       Bitmap bmp = decodeImage(sendData.getString("image"));
       addImage(bmp,MESSAGE_SENT);
       socket.emit("message",sendData);
+      Log.d("SENDING IMAGE",sendData.getString("image"));
     }catch(JSONException e){
-
+      e.printStackTrace();
     }
   }
 
@@ -233,15 +270,12 @@ public class GroupChat extends Fragment
     this.adp.notifyDataSetChanged();
   }
 
-  private Bitmap decodeImage(String data)
-  {
+  private Bitmap decodeImage(String data) {
     byte[] b = Base64.decode(data,Base64.DEFAULT);
-    Bitmap bmp = BitmapFactory.decodeByteArray(b,0,b.length);
-    return bmp;
-  }
+    return  BitmapFactory.decodeByteArray(b,0,b.length);
+   }
 
-  private String encodeImage(String path)
-  {
+  private String encodeImage(String path) {
     File imagefile = new File(path);
     FileInputStream fis = null;
     try{
@@ -253,48 +287,11 @@ public class GroupChat extends Fragment
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     bm.compress(Bitmap.CompressFormat.JPEG,100,baos);
     byte[] b = baos.toByteArray();
-    String encImage = Base64.encodeToString(b, Base64.DEFAULT);
+    return Base64.encodeToString(b, Base64.DEFAULT);
     //Base64.de
-    return encImage;
+
 
   }
-
-
-  private Emitter.Listener IncomingMessageListerner = new Emitter.Listener() {
-    @Override
-    public void call(final Object... args) {
-
-      getActivity().runOnUiThread(new Runnable() {
-        @Override
-        public void run() {
-            JSONObject Data = (JSONObject) args[0];
-            String message="";
-            String imageText = "";
-            try {
-                message = Data.getString("message");
-                Log.d("RECIEVED MESSAGE",message);
-                String arr[] = message.split("[\":]");
-//              Log.d("Data Split",arr[2]);
-//              Toast.makeText(getActivity(), ""+arr.length,Toast.LENGTH_LONG).show();
-//              sample Style: {"text":"data"}
-                 addMessage(arr[4],MESSAGE_RECIEVED);
-              //  addMessage(message,MESSAGE_RECIEVED);
-                }
-            catch (JSONException e){
-                e.printStackTrace();
-            }
-            try {
-              imageText = Data.getString("image");
-              Log.d("DECODEIMAGE",imageText);
-              addImage(decodeImage(imageText),MESSAGE_RECIEVED);
-            }
-            catch (JSONException e) {
-            //retur
-          }
-        }
-      });
-    }
-  };
 
   @Override
   public void onDestroy() {
@@ -314,9 +311,8 @@ public class GroupChat extends Fragment
       return GroupChat.this.convList.size();
     }
 
-    public Conversation getItem(int paramInt)
-    {
-      return (Conversation)GroupChat.this.convList.get(paramInt);
+    public Conversation getItem(int paramInt) {
+      return GroupChat.this.convList.get(paramInt);
     }
 
     public long getItemId(int paramInt)
@@ -339,10 +335,9 @@ public class GroupChat extends Fragment
         ImageView imguser = (ImageView) SentView.findViewById(R.id.imgSender);
         ImageView imgSent = (ImageView) SentView.findViewById(R.id.lblSentImg);
 
-
         tvdate.setText(localConversation.getDate());
 
-        if(localConversation.getMsg()==null||localConversation.getMsg().equals("")) {
+        if(localConversation.getMsg()== null||localConversation.getMsg().equals("")) {
           tvmsg.setText("");
         }
         else{
@@ -384,16 +379,18 @@ public class GroupChat extends Fragment
         }
         else{
           tvmsg.setText(localConversation.getMsg());
-          Log.d("FINALmessage",localConversation.getMsg());
+//          Log.d("FINALmessage",localConversation.getMsg());
         }
 
         if(localConversation.getImage() == null){
           imgRcv.setVisibility(View.INVISIBLE);
           Log.d("FINALIMAGE","Image is Null");
+
         }
         else{
           imgRcv.setImageBitmap(localConversation.getImage());
-          Log.d("FINALIMAGE",localConversation.getImage().toString());
+          //Log.d("FINALIMAGE",localConversation.getImage().toString());
+          Log.d("FINALIMAGE","Image is Something");
         }
 
         if (localConversation.isSuccess()) {

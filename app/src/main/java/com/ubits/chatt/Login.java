@@ -15,9 +15,9 @@ import android.widget.Toast;
 
 public class Login extends AppCompatActivity {
 
+    public String UserName= "";
     Button submit;
     TextView tvname;
-    public String UserName= "";
 
  @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +27,7 @@ public class Login extends AppCompatActivity {
 
         submit = (Button) findViewById(R.id.btnChatt);
         tvname = (TextView) findViewById(R.id.displayName);
+        tvname.setText("192.168.1.106");
 
 
 

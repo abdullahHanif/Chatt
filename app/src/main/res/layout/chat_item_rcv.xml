@@ -10,42 +10,40 @@
         android:layout_height="match_parent"
         android:layout_marginLeft="@dimen/pad_20dp"
         android:layout_marginRight="@dimen/pad_15dp"
-        android:paddingTop="@dimen/pad_10dp"
         android:layout_marginTop="@dimen/pad_10dp"
-       >
+        android:paddingTop="@dimen/pad_10dp" >
         <TextView
             android:id="@+id/lblseen"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignLeft="@+id/v2"
+            android:layout_below="@id/v2"
             android:text="textvdv"
             android:textColor="@color/main_color_gray"
-            android:textSize="@dimen/txt_14sp"
-            android:layout_below="@id/v2" />
+            android:textSize="@dimen/txt_14sp" />
 
         <ImageView
             android:id="@+id/imgrcv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/user_chat1"
             android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true" />
+            android:layout_alignParentStart="true"
+            android:src="@drawable/user_chat1" />
 
         <LinearLayout
             android:id="@+id/v2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@id/imgrcv"
+            android:layout_alignParentTop="true"
+            android:layout_toEndOf="@+id/imgrcv"
+            android:layout_toRightOf="@+id/imgrcv"
             android:background="@drawable/chat_bubble_gray"
             android:gravity="center_vertical"
             android:orientation="vertical"
             android:paddingBottom="@dimen/pad_5dp"
             android:paddingLeft="@dimen/pad_chat_item"
-            android:paddingTop="@dimen/pad_5dp"
             android:paddingRight="@dimen/pad_15dp"
-            android:layout_toEndOf="@+id/imgrcv"
-            android:layout_alignParentTop="true"
-            android:layout_toRightOf="@+id/imgrcv"
+            android:paddingTop="@dimen/pad_5dp"
             >
 
             <TextView
@@ -60,21 +58,14 @@
                 android:id="@+id/lblrcvmsg"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:maxLines="4"
+                android:maxLines="999"
                 android:text="textvdv"
                 android:textColor="@color/main_color_gray_dk"
                 android:textSize="@dimen/txt_14sp" />
             <ImageView
                 android:id="@+id/lblrcvImg"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="textvdv"
-                android:textColor="@color/main_color_gray_dk"
-                android:textSize="@dimen/txt_14sp" />
-
+                android:layout_height="wrap_content" />
         </LinearLayout>
-
-
-
     </RelativeLayout>
 </LinearLayout>
